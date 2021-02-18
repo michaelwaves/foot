@@ -1,0 +1,64 @@
+
+//for the sensors
+int trigPin_x = 1;
+int echoPin_x = 2;
+int trigPin_y = 3;
+int echoPin_y = 4;
+float delayTime = 5;
+float pulseTime = 10;
+float duration_x;
+float duration_y;
+float distance_x;
+float distance_y;
+float soundSpeed = 0.034;
+
+//for the button
+int buttonPin = 6;
+int buttonState;
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(9600);
+pinMode(trigPin_x, OUTPUT);
+pinMode(echoPin_x, INPUT);
+pinMode(trigPin_y, OUTPUT);
+pinMode(echoPin_y, INPUT);
+pinMode(buttonPin, INPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+digitalWrite(trigPin_x, LOW);
+delayMicroseconds(delayTime);
+digitalWrite(trigPin_x, HIGH);
+delayMicroseconds(pulseTime);
+digitalWrite(trigPin_x, LOW);
+duration_x = pulseIn(echoPin_x, HIGH);
+distance_x = duration_x*soundSpeed/2;
+Serial.print("Horizontal Distance: ");
+Serial.print(distance_x);
+Serial.println(" cm");
+
+delay(500);
+
+/*delay(pulseTime);
+digitalWrite(trigPin_y, LOW);
+delayMicroseconds(delayTime);
+digitalWrite(trigPin_y, HIGH);
+delayMicroseconds(pulseTime);
+digitalWrite(trigPin_y, LOW);
+duration_y = pulseIn(echoPin_x, HIGH);
+distance_y = duration_y*soundSpeed/2;
+Serial.print("Vertical Distance: ");
+Serial.print(distance_y);
+Serial.println(" cm");*/
+
+
+buttonState = digitalRead(buttonPin);
+if (buttonState == LOW) {
+  Serial.print("click");
+  delayMicroseconds(delayTime);
+}
+}
