@@ -30,35 +30,34 @@ pinMode(buttonPin, INPUT);
 
 void loop() {
   // put your main code here, to run repeatedly:
-digitalWrite(trigPin_x, LOW);
-delayMicroseconds(delayTime);
-digitalWrite(trigPin_x, HIGH);
-delayMicroseconds(pulseTime);
-digitalWrite(trigPin_x, LOW);
-duration_x = pulseIn(echoPin_x, HIGH);
-distance_x = duration_x*soundSpeed/2;
-Serial.print("Horizontal Distance: ");
-Serial.print(distance_x);
-Serial.println(" cm");
-
-delay(500);
-
-/*delay(pulseTime);
-digitalWrite(trigPin_y, LOW);
-delayMicroseconds(delayTime);
-digitalWrite(trigPin_y, HIGH);
-delayMicroseconds(pulseTime);
-digitalWrite(trigPin_y, LOW);
-duration_y = pulseIn(echoPin_x, HIGH);
-distance_y = duration_y*soundSpeed/2;
-Serial.print("Vertical Distance: ");
-Serial.print(distance_y);
-Serial.println(" cm");*/
-
-
-buttonState = digitalRead(buttonPin);
-if (buttonState == LOW) {
-  Serial.print("click");
+  buttonState = digitalRead(buttonPin);
+  digitalWrite(trigPin_x, LOW);
   delayMicroseconds(delayTime);
+  digitalWrite(trigPin_x, HIGH);
+  delayMicroseconds(pulseTime);
+  digitalWrite(trigPin_x, LOW);
+  duration_x = pulseIn(echoPin_x, HIGH);
+  distance_x = duration_x*soundSpeed/2;
+  
+  delay(pulseTime);
+  digitalWrite(trigPin_y, LOW);
+  delayMicroseconds(delayTime);
+  digitalWrite(trigPin_y, HIGH);
+  delayMicroseconds(pulseTime);
+  digitalWrite(trigPin_y, LOW);
+  duration_y = pulseIn(echoPin_y, HIGH);  
+  distance_y = duration_y*soundSpeed/2;
+
+
+  Serial.print("V: ");
+  Serial.println(distance_x);
+
+ if (buttonState == HIGH) {
+  Serial.print("C");
+  delayMicroseconds(delayTime*4);
 }
+  Serial.print("H: ");
+  Serial.print(distance_y);
+
+
 }
