@@ -1,0 +1,163 @@
+# Importing Libraries
+import serial
+import time
+import pyautogui
+import re
+arduino = serial.Serial(port='COM6', baudrate=9600, timeout=.1)
+def parseNumber(text):
+
+    try:
+        # First we return None if we don't have something in the text:
+        if text is None:
+            return None
+        if isinstance(text, int) or isinstance(text, float):
+            return text
+        text = text.strip()
+        if text == "":
+            return None
+        # Next we get the first "[0-9,. ]+":
+        n = re.search("-?[0-9]*([,. ]?[0-9]+)+", text).group(0)
+        n = n.strip()
+        if not re.match(".*[0-9]+.*", text):
+            return None
+        # Then we cut to keep only 2 symbols:
+        while " " in n and "," in n and "." in n:
+            index = max(n.rfind(','), n.rfind(' '), n.rfind('.'))
+            n = n[0:index]
+        n = n.strip()
+        # We count the number of symbols:
+        symbolsCount = 0
+        for current in [" ", ",", "."]:
+            if current in n:
+                symbolsCount += 1
+        # If we don't have any symbol, we do nothing:
+        if symbolsCount == 0:
+            pass
+        # With one symbol:
+        elif symbolsCount == 1:
+            # If this is a space, we just remove all:
+            if " " in n:
+                n = n.replace(" ", "")
+            # Else we set it as a "." if one occurence, or remove it:
+            else:
+                theSymbol = "," if "," in n else "."
+                if n.count(theSymbol) > 1:
+                    n = n.replace(theSymbol, "")
+                else:
+                    n = n.replace(theSymbol, ".")
+        else:
+            # Now replace symbols so the right symbol is "." and all left are "":
+            rightSymbolIndex = max(n.rfind(','), n.rfind(' '), n.rfind('.'))
+            rightSymbol = n[rightSymbolIndex:rightSymbolIndex+1]
+            if rightSymbol == " ":
+                return parseNumber(n.replace(" ", "_"))
+            n = n.replace(rightSymbol, "R")
+            leftSymbolIndex = max(n.rfind(','), n.rfind(' '), n.rfind('.'))
+            leftSymbol = n[leftSymbolIndex:leftSymbolIndex+1]
+            n = n.replace(leftSymbol, "L")
+            n = n.replace("L", "")
+            n = n.replace("R", ".")
+        # And we cast the text to float or int:
+        n = float(n)
+        if n.is_integer():
+            return int(n)
+        else:
+            return n
+    except: pass
+    return None
+
+
+
+
+def get_dist():
+    data = arduino.readline()
+    #return data
+    return data.decode('utf-8')
+
+average_cycle = 0
+click_count = 0
+x_coord_list = []
+y_coord_list = []
+
+while True:
+    cycle += 1
+    data = get_dist()
+    #print(data)
+    i = 1
+    V_ind = 0
+    for char in data:
+        if char == "V":
+            V_ind = i
+        i = i+1
+    if data[0] == 'C':
+        py.autogui.click()
+        click_count += 1
+    elif V_ind != 0:
+
+        x_dim = data[2:V_ind-1]
+        y_dim = data[V_ind + 2:]
+        #x_dim = x_dim.strip(' ')
+        #x_dim = x_dim.strip('\t')
+        #x_dim = x_dim.strip('\r')
+        #x_dim = x_dim.rstrip(' ')
+        #y_dim = y_dim.strip(' ')
+        #y_dim = y_dim.strip('\r')
+        #print(type(x_dim))
+        #x_dim = x_dim.replace('.','')
+        x_dim = parseNumber(x_dim)
+        y_dim = float(y_dim)
+        #print(type(x_dim), type(y_dim))
+        print(x_dim,y_dim)
+        #two variables, x_coord and prev_xcoord
+        try:
+            x_coord = (x_dim - 3)/20 * 1920
+            x_coord_list.append(x_coord)
+            if y_dim > 4:
+                y_coord = (y_dim - 4)/7.25 * 1080
+                prev_ycoord = y_coord
+            else:
+                y_coord = prev_ycoord
+                y_coord_list.append(y_coord)
+            print(x_coord, y_coord)
+            #pyautogui.moveTo(x_coord, y_coord)
+        except:
+            #print("error")
+        if cycle == 10:
+            avg = 0
+            for val in x_coord_list:
+                avg += val
+            x_pos = avg / 10
+            avg = 0
+            for val in y_coord_list:
+                avg += val
+            y_pos = avg / 10
+            #tentative position... still need to factor in velocity
+            x_velocity_factor = sqrt((x_coord_list[-1] - x_coord_list[0])^2)
+            y_velocity_factor =  sqrt((y_coord_list[-1] - y_coord_list[0])^2)
+
+            if click_count > 4:
+                #activate DRAG MODE
+                py.autogui.drag(x_pos + x_velocity_factor, y_pos + y_velocity_factor, duration=0.1)
+
+            py.autogui.moveTo(x_pos + x_velocity_factor , y_pos + y_velocity_factor)
+
+
+            x_coord_list = []
+            y_coord_list = []
+       #
+       click_count = 0
+
+
+#get rolling avg
+#get velocity
+#drag mode
+
+
+# max right = 23
+# max left = 3
+#max up = 4
+#max down = 11.25 cm
+
+#conversion to pixel:
+#x = dim - max / max_range * 1920
+#y = dim -max / max_range * 1080
