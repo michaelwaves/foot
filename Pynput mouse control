@@ -1,0 +1,70 @@
+from pynput.mouse import Button,  Controller
+from statistics import mean
+import re #for finding number in string
+import serial
+
+ 
+ser = serial.Serial("COM4")
+mouse = Controller()
+
+x = 0
+y = 0
+length = 3
+count = 0
+count_2 = 0
+x_list = []
+y_list = []
+pair = []
+#x_adjust = 97.5
+#y_adjust = 83.07
+y_speed =3
+x_speed =3
+pressed= False
+
+while(1):
+ 
+    # Wait until there is data waiting in the serial buffer
+    count =0 
+    x_list = []
+    y_list = []
+    if(ser.in_waiting > 10):
+    	while count < length:
+    		serialString = ser.readline()
+    		s = serialString.decode('UTF-8')
+    		pair = re.findall(r'\d*\.?\d+',s)
+    		#pair = re.findall(r'\d+', s)
+    		#print(pair)
+
+    		if (len(pair) == 2):
+
+    			x_list.append(float(pair[0]))
+    			y_list.append(float(pair[1]))
+    		if ("C" in s ):
+    			mouse.press(Button.left) #for dragging
+    			#mouse.click(BUtton.left) #for clicking
+
+
+
+
+
+    		count += 1
+
+    	x = mean(x_list)
+    	y = mean(y_list)
+
+    	#x_a = x*x_adjust-400
+    	#y_a = y*y_adjust-300
+
+    	print('h '+ str(x))
+    	print('v' + str(y))
+
+    	x_m = (x-10)*x_speed
+    	y_m = (y-10)*y_speed
+
+    	#mouse.position =  (x_a,y_a) 
+
+    	mouse.move(x_m,y_m)
+    	'''if (x_m > 5 or x_m < -5):
+    		mouse.move(x_m, 0)
+    	if (y_m > 7 or y_m < -7): 
+    		mouse.move(0, y_m)'''
